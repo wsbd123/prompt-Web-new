@@ -1,0 +1,7 @@
+{
+  "buildCommand": "cd spa && npm install && npm run build",
+  "outputDirectory": "spa/dist",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
