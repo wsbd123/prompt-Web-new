@@ -7,6 +7,8 @@ import { Copy, Check } from 'lucide-react';
 import { useState } from 'react';
 import type { Prompt } from '../types';
 import { useStore } from '../store';
+import { playClickSound } from '../sound';
+import { copyToClipboard } from '../utils';
 
 interface PromptCardProps {
   prompt: Prompt;
@@ -20,11 +22,12 @@ export default function PromptCard({ prompt }: PromptCardProps) {
   // 复制提示词内容
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    try {
-      await navigator.clipboard.writeText(prompt.content);
-      setCopiedId(prompt.id);
-      setTimeout(() => setCopiedId(null), 1000);
-    } catch {
+    // 先立即变绿，再异步执行复制，避免动画延迟
+    setCopiedId(prompt.id);
+    setTimeout(() => setCopiedId(null), 1000);
+    const success = await copyToClipboard(prompt.content);
+    if (!success) {
+      setCopiedId(null);
       showToast('复制失败', 'error');
     }
   };
@@ -59,6 +62,7 @@ export default function PromptCard({ prompt }: PromptCardProps) {
         </div>
         <button
           onClick={handleCopy}
+          onTouchStart={(e) => { e.stopPropagation(); playClickSound(); }}
           className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg transition-colors ${
             copiedId === prompt.id
               ? 'bg-green-500'

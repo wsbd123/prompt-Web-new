@@ -7,8 +7,9 @@ import { useState, useEffect } from 'react';
 import { X, Copy, Edit2, Trash2, Check } from 'lucide-react';
 import { useStore } from '../store';
 import { updatePrompt, deletePrompt } from '../data-manager';
-import { validateName, validateContent, validateCategory, validateModelName } from '../utils';
+import { validateName, validateContent, validateCategory, validateModelName, copyToClipboard } from '../utils';
 import { useBackButton, useEscKey } from '../hooks/useBackButton';
+import { playClickSound } from '../sound';
 import type { Prompt } from '../types';
 
 export default function EditModal() {
@@ -116,10 +117,10 @@ export default function EditModal() {
   // 复制
   const handleCopy = async () => {
     if (!prompt) return;
-    try {
-      await navigator.clipboard.writeText(prompt.content);
+    const success = await copyToClipboard(prompt.content);
+    if (success) {
       showToast('已复制到剪贴板', 'success');
-    } catch {
+    } else {
       showToast('复制失败', 'error');
     }
   };
@@ -151,6 +152,7 @@ export default function EditModal() {
               <>
                 <button
                   onClick={handleCopy}
+                  onTouchStart={() => playClickSound()}
                   className="p-2 rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors"
                   title="复制"
                 >
